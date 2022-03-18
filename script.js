@@ -1,14 +1,9 @@
+var publicTasks = [];
 let checkboxToggle = document.querySelector('.checkbox-toggle');
 let body = document.body;
-
-checkboxToggle.addEventListener("change", function(){
-    if(checkboxToggle.checked){
-        body.classList.add("light")
-        body.classList.remove("dark")
-    }else{
-        body.classList.add("dark")
-    }
-})
+let newTodoCheckMark = document.querySelector(".new-todo .check-circle");
+let newCheck = false;
+const pages = document.querySelectorAll(".items-status span");
 
 function addItem(event){
     const currentDate = new Date();
@@ -18,12 +13,14 @@ function addItem(event){
     let newItem = db.collection("todo-items").add({
         time: -timestamp,
         text: text.value,
-        done: false
+        done: newCheck ? true : false
     })
     text.value = "";
-}
+    newCheck = false;
+    newTodoCheckMark.classList.remove("checked");
 
-var publicTasks = [];
+    showAll(pages);
+}
 
 function getItems(){
     db.collection("todo-items").orderBy('time').onSnapshot((snapshot) => {
@@ -38,6 +35,7 @@ function getItems(){
         generateItems(items);
     })
 }
+getItems();
 
 function generateItems(items){
     let itemsHTML = "";
@@ -53,8 +51,10 @@ function generateItems(items){
             <div class="todo-text ${item.done ? "checked" : ""}">
                 <span class="crop">${item.text}</span>
             </div>
+            <div class="delete-container">
             <div data-id=${item.id} class="delete-item">
                 <img src="assets/icon-cross.svg" alt="del-icon"></img>
+            </div>
             </div>
         </div>
         `;
@@ -62,7 +62,7 @@ function generateItems(items){
     });
 
     let itemRem = document.querySelector(".items-left");
-    itemRem.innerHTML = taskNum + ' items left';
+    itemRem.innerHTML = taskNum + ' items';
 
     document.querySelector(".todo-items").innerHTML = itemsHTML;
     createEventListeners(items);
@@ -70,7 +70,6 @@ function generateItems(items){
 
 function createEventListeners(items){
     let todoCheckMarks = document.querySelectorAll(".todo-item .check-circle");
-
     let clear = document.querySelector('.items-clear');
 
     todoCheckMarks.forEach((check) => {
@@ -78,14 +77,13 @@ function createEventListeners(items){
             markCompleted(check.dataset.id);
         });
         clear.addEventListener('click', function() {
-            clearCompleted(check.dataset.id)
+            clearCompleted(check.dataset.id);
         });
     });
 
-    const pages = document.querySelectorAll(".items-status span");
     pages.forEach((page) => page.addEventListener("click", () => {
         pages.forEach(activepage => (activepage.textContent === page.textContent) ? activepage.classList.add("active") : activepage.classList.remove("active"))
-        statusPages(items);
+        statusPages(publicTasks);
     }));
 
     let delItem = document.querySelectorAll(".todo-item .delete-item");
@@ -96,14 +94,38 @@ function createEventListeners(items){
     });
 }
 
+checkboxToggle.addEventListener("change", function(){
+    if(checkboxToggle.checked){
+        body.classList.add("light")
+        body.classList.remove("dark")
+    }else{
+        body.classList.add("dark")
+    }
+})
+
+function showAll(pages){
+    pages.forEach(page => {
+        page.classList.remove("active")
+        if (page.textContent === "All") page.classList.add("active");
+    });
+}
+
+function createNewTodoListener() {
+    newTodoCheckMark.addEventListener("click", function(){
+        newCheck = !newCheck; 
+        newCheck ? newTodoCheckMark.classList.add("checked") : newTodoCheckMark.classList.remove("checked");        
+    });
+}
+createNewTodoListener();
+
 function statusPages(items) {
     const page = document.querySelector(".active").textContent
     const resetList = document.querySelector('.todo-items')
     resetList.innerHTML = " ";
-    let listTaskTemporal = [...publicTasks];
+    let listTaskTemporal = [...items];
     if (page != "All") {
       const done = (page === "Completed");
-      listTaskTemporal = publicTasks.filter((task) => task.done === done)
+      listTaskTemporal = items.filter((task) => task.done === done)
     } 
     generateItems(listTaskTemporal);
 }
@@ -122,7 +144,7 @@ function markCompleted(id) {
                 item.update({
                     done: true
                 });
-            } else if(status){
+            } else {
                 item.update({
                     done: false
                 });
@@ -132,7 +154,7 @@ function markCompleted(id) {
 }
 
 function clearCompleted(id){
-    let tb = db.collection('todo-items').doc(id)
+    let tb = db.collection('todo-items').doc(id);
     tb.get().then(function (doc) {
         if(doc.exists){
             let status = doc.data().done;
@@ -140,13 +162,15 @@ function clearCompleted(id){
                 tb.delete();
             }
         }
-    });    
+    }); 
+    showAll(pages);   
 }
 
-getItems();
-
-// const dragArea = document.querySelector('.todo-items');
-// new Sortable(dragArea, {
-//     animation: 350,
-//     chosenClass: 'sort-chosen'
-// });
+// function for adding drag and drop feature
+/*
+const dragArea = document.querySelector('.todo-items');
+new Sortable(dragArea, {
+    animation: 350,
+    chosenClass: 'sort-chosen'
+});
+*/

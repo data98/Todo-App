@@ -12,7 +12,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-analytics.js"></script>
     <script src="./firebase.js"></script>
-    
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
     <title>To Do App</title>
 </head>
 <body class="light">
@@ -31,14 +31,17 @@
         </div>
         <div class="new-todo">
             <div class="check">
-                <!-- <div class="check-circle">
-
-                </div> -->
+                <div class="check-circle">
+                    <img src="./assets/icon-check.svg" />
+                </div>
             </div>
             <div class="new-todo-input">
                 <form onsubmit="addItem(event)">
                     <input id="todo-input" type="text" placeholder="Create a new task">
                 </form>
+            </div>
+            <div class="send-container">
+                <img src="./assets/send.png" class="send-btn" onclick="addItem(event)" />
             </div>
         </div>
         <div class="todo-items-wrapper">
@@ -70,8 +73,5 @@
     </div>
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js" integrity="sha512-zYXldzJsDrNKV+odAwFYiDXV2Cy37cwizT+NkuiPGsa9X1dOz04eHvUWVuxaJ299GvcJT31ug2zO4itXBjFx4w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
     <script type="text/javascript" src="./script.js"></script>
-</body>
-</html>
-
 </body>
 </html>
